@@ -1,0 +1,10 @@
+# Runtime state of the resident CROSS server (pidfile, socket, markers, log).
+run/
+# Generated keys and traces from a profiling sweep; the committed results/
+# JSON and logs are the reportable artifacts.
+results/tpu_profile/keys/
+results/tpu_profile/traces/
+__pycache__/
+*.pyc
+# Training checkpoint; model/he_mlp_weights.pth is the committed artifact.
+model/*.pth.train

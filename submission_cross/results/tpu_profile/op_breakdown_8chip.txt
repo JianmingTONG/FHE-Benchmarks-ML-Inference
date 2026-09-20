@@ -1,0 +1,59 @@
+Total Trace Duration (Sum): 7500539.4608 us
+------------------------------
+INTT: 55390.0752 us (0.74%)
+NTT: 128802.5807 us (1.72%)
+VecModOps: 1766076.9453 us (23.55%)
+  - select_n: 1417376.4158 us (80.26%)
+  - bitcast: 211706.3349 us (11.99%)
+  - and: 72237.5879 us (4.09%)
+  - reduce_sum: 48331.6855 us (2.74%)
+  - add: 8033.8327 us (0.45%)
+  - sub: 6833.5280 us (0.39%)
+  - multiply: 799.6824 us (0.05%)
+  - clamp: 641.5604 us (0.04%)
+  - shift: 116.3177 us (0.01%)
+BConv: 68607.9064 us (0.91%)
+Memory Reorder: 190401.6874 us (2.54%)
+  - reshape: 86965.5290 us (45.67%)
+  - slice: 45959.7292 us (24.14%)
+  - broadcast: 24623.1107 us (12.93%)
+  - concatenate: 24487.9423 us (12.86%)
+  - copy: 7017.5317 us (3.69%)
+  - gather: 1347.8444 us (0.71%)
+Permutation: 1199022.7562 us (15.99%)
+  - take/gather: 1198647.9111 us (99.97%)
+  - take: 374.8451 us (0.03%)
+Type Conversion: 54533.0224 us (0.73%)
+  - convert: 54530.7225 us (100.00%)
+  - convert_element_type: 2.2998 us (0.00%)
+Other: 4037704.4872 us (53.83%)
+  - unknown: 4037704.4872 us (100.00%)
+trace      : submission_cross/results/tpu_profile/traces/8chip_lb1/plugins/profile/2026_09_19_23_29_42/t1v-n-c9b59040-w-0.trace.json.gz
+device lanes: [0, 1, 2, 3, 4, 5, 6, 7]  (reporting 8 chip(s))
+events     : 4160 distinct op names, 7500.54 ms total
+wrote      : submission_cross/results/tpu_profile/traces/8chip_lb1/filtered_events.json
+
+device time by XLA hlo_category (leaf nodes, while-loops excluded)
+        ms   share    count  category
+----------------------------------------------
+   1782.40   51.5%   310992  loop fusion
+   1056.84   30.5%    19056  custom fusion
+    320.50    9.3%   217947  data formatting
+    252.80    7.3%    87192  convolution fusion
+     24.21    0.7%    17664  broadcast
+     19.33    0.6%    38112  dynamic-slice
+      5.81    0.2%    58008  copy-done
+      0.52    0.0%    58008  copy-start
+      0.35    0.0%     4272  async-done
+      0.06    0.0%      240  slice
+      0.03    0.0%     4272  async-start
+      0.01    0.0%      168  iota
+      0.00    0.0%     1608  custom-call
+----------------------------------------------
+   3462.85  100.0%           total
+
+   4037.69 ms  while (container: includes the leaves above)
+
+normalized: 3462.8 ms over 8 lane(s) x 3 iteration(s) = 144.3 ms per chip per execute
+
+CROSS name-keyword analyzer (profile_analysis/analyze_trace_json.py)

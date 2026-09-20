@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Benchmark stage 9 -- client: turn decrypted logits into labels."""
+import os, sys, time
+os.environ.setdefault('JAX_PLATFORMS', 'cpu')
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
+import numpy as np
+import cross_task as ct
+
+def main():
+    size = ct.parse_size(sys.argv)
+    paths = ct.Paths(size)
+    started = time.perf_counter()
+    decoded = paths.iointermdir / 'decrypted_logits.npy'
+    if not decoded.exists():
+        sys.exit(f'[client] {decoded} not found; run client_decrypt_decode '
+                 '(benchmark stage 8) first')
+    logits = np.real(np.load(decoded))
+    if not np.isfinite(logits).all():
+        sys.exit('[client] decrypted logits contain non-finite values; the '
+                 'ciphertext most likely exhausted its modulus chain')
+    labels = np.argmax(logits, axis=1)
+    ct.write_labels(paths.predictions_file, labels)
+    ct.append_timing(paths, 'client_postprocess',
+                     {'elapsed_s': time.perf_counter() - started})
+
+if __name__ == '__main__':
+    main()

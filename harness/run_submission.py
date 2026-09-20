@@ -26,12 +26,13 @@ def main():
     utils.ensure_directories(params.rootdir)
 
     # Build the submission if not built already
-    utils.build_submission(params.rootdir/"scripts")
+    submission_dir = params.rootdir/utils.submission_dirname()
+    utils.build_submission(params.rootdir/"scripts", submission_dir)
 
     # The harness scripts are in the 'harness' directory,
-    # the executables are in the directory submission/build
+    # the executables are in the directory <submission>/build
     harness_dir = params.rootdir/"harness"
-    exec_dir = params.rootdir/"submission"/"build"
+    exec_dir = submission_dir/"build"
 
     # Remove and re-create IO directory
     io_dir = params.iodir()
@@ -56,7 +57,7 @@ def main():
     utils.log_size(io_dir / "public_keys", "Client: Public and evaluation keys")
 
     # 3. Server-side: Preprocess the (encrypted) dataset using exec_dir/server_preprocess_model
-    subprocess.run(exec_dir/"server_preprocess_model", check=True)
+    subprocess.run([exec_dir/"server_preprocess_model", str(size)], check=True)
     utils.log_step(3, "Server: (Encrypted) model preprocessing")
 
     # Run steps 4-10 multiple times if requested

@@ -1,0 +1,19 @@
+{
+  "total_latency_ms": 493.2396,
+  "per_stage": {
+    "Harness: MNIST Test dataset generation": "4.1665s",
+    "Client: Key Generation": "4.7195s",
+    "Server: (Encrypted) model preprocessing": "475.5046s",
+    "Harness: Input generation for MNIST": "1.9481s",
+    "Client: Input preprocessing": "0.0815s",
+    "Client: Input encryption": "3.8191s",
+    "Server: Encrypted ML Inference computation": "0.2566s",
+    "Client: Result decryption": "2.6628s",
+    "Client: Result postprocessing": "0.081s"
+  },
+  "bandwidth": {
+    "Client: Public and evaluation keys": "8.0M",
+    "Client: Encrypted input": "3.0M",
+    "Client: Encrypted results": "517.5K"
+  }
+}

@@ -1,0 +1,91 @@
+[run] submission=submission_cross chips=8 size=0
+
+[harness] Running submission for single inference
+[build] runtime dependencies present
+[build] model weights present: he_mlp_weights.pth
+[build] CROSS submission ready
+22:40:00 [harness] 1: Harness: MNIST Test dataset generation completed (elapsed: 4.1665s)
+         [client] ring: degree=32768 slots=16384 num_q=12 num_p=4 dnum=3 depth=5 security=128-bit classical
+22:40:05 [harness] 2: Client: Key Generation completed (elapsed: 4.7195s)
+         [harness] Client: Public and evaluation keys size: 8.0M
+         [server] CROSS Mapping resident on 8 TPU chip(s), global_batch=8
+         [server] ring degree=32768 slots=16384 depth=5 security=128-bit
+         [server] setup: pack 0.84s, keys 0.09s, mapping 461.69s, warmup 3.69s
+         [server] rotation keys: 134, live memory estimate: 3.17 GiB
+22:48:01 [harness] 3: Server: (Encrypted) model preprocessing completed (elapsed: 475.5046s)
+
+         [harness] Run 1 of 3
+22:48:03 [harness] 4: Harness: Input generation for MNIST completed (elapsed: 1.8715s)
+22:48:03 [harness] 5: Client: Input preprocessing completed (elapsed: 0.084s)
+22:48:06 [harness] 6: Client: Input encryption completed (elapsed: 3.813s)
+         [harness] Client: Encrypted input size: 3.0M
+         [server] Run encrypted MNIST inference on 8 TPU chip(s)
+         [server] chunk 0 (1 ciphertext(s)): 153.4 ms
+         [server] encrypted compute: 0.153s for 1 inference(s) -> 153.4 ms each, 6.52 inferences/s
+22:48:07 [harness] 7: Server: Encrypted ML Inference computation completed (elapsed: 0.3079s)
+         [harness] Client: Encrypted results size: 517.5K
+22:48:09 [harness] 8: Client: Result decryption completed (elapsed: 2.6799s)
+22:48:10 [harness] 9: Client: Result postprocessing completed (elapsed: 0.0825s)
+[harness] PASS  (expected=7, got=7)
+[total latency] 493.2293s
+
+         [harness] Run 2 of 3
+22:48:12 [harness] 4: Harness: Input generation for MNIST completed (elapsed: 1.9481s)
+22:48:12 [harness] 5: Client: Input preprocessing completed (elapsed: 0.0815s)
+22:48:15 [harness] 6: Client: Input encryption completed (elapsed: 3.8191s)
+         [harness] Client: Encrypted input size: 3.0M
+         [server] Run encrypted MNIST inference on 8 TPU chip(s)
+         [server] chunk 0 (1 ciphertext(s)): 153.8 ms
+         [server] encrypted compute: 0.154s for 1 inference(s) -> 153.8 ms each, 6.50 inferences/s
+22:48:16 [harness] 7: Server: Encrypted ML Inference computation completed (elapsed: 0.2566s)
+         [harness] Client: Encrypted results size: 517.5K
+22:48:18 [harness] 8: Client: Result decryption completed (elapsed: 2.6628s)
+22:48:18 [harness] 9: Client: Result postprocessing completed (elapsed: 0.081s)
+[harness] PASS  (expected=7, got=7)
+[total latency] 493.2396s
+
+         [harness] Run 3 of 3
+22:48:20 [harness] 4: Harness: Input generation for MNIST completed (elapsed: 1.9574s)
+22:48:20 [harness] 5: Client: Input preprocessing completed (elapsed: 0.0821s)
+22:48:24 [harness] 6: Client: Input encryption completed (elapsed: 4.0155s)
+         [harness] Client: Encrypted input size: 3.0M
+         [server] Run encrypted MNIST inference on 8 TPU chip(s)
+         [server] chunk 0 (1 ciphertext(s)): 155.2 ms
+         [server] encrypted compute: 0.155s for 1 inference(s) -> 155.2 ms each, 6.44 inferences/s
+22:48:25 [harness] 7: Server: Encrypted ML Inference computation completed (elapsed: 0.2592s)
+         [harness] Client: Encrypted results size: 517.5K
+22:48:27 [harness] 8: Client: Result decryption completed (elapsed: 2.647s)
+22:48:27 [harness] 9: Client: Result postprocessing completed (elapsed: 0.0823s)
+[harness] PASS  (expected=7, got=7)
+[total latency] 493.4341s
+
+All steps completed for the single inference!
+
+CROSS on TPU v6e — FHE-Benchmarks-ML-Inference (MNIST)
+(no TPU sweep results at /home/jianming_gatech/FHE-Benchmarks-ML-Inference/submission_cross/profile/results/profile_results.json)
+
+CROSS submission stage timings — single instance
+================================================
+  2 client_key_generation   : pack 1.32s  keygen 2.73s  save 0.07s
+  3 server_preprocess_model : 475.4s total  (mapping 461.7s, warmup 3.7s)
+  5 client_preprocess_input : 0.000s
+  6 client_encode_encrypt   : 1.81s for 1 sample(s) = 1809 ms each (+1.4s context setup)
+  7 server_encrypted_compute: 0.153s TPU execute for 1 inference(s) on 8 chip(s) = 153 ms each, 6.52/s
+  8 client_decrypt_decode   : 0.64s for 1 sample(s) = 636 ms each
+  9 client_postprocess      : 0.000s
+  5 client_preprocess_input : 0.000s
+  6 client_encode_encrypt   : 1.81s for 1 sample(s) = 1810 ms each (+1.4s context setup)
+  7 server_encrypted_compute: 0.154s TPU execute for 1 inference(s) on 8 chip(s) = 154 ms each, 6.50/s
+  8 client_decrypt_decode   : 0.63s for 1 sample(s) = 634 ms each
+  9 client_postprocess      : 0.001s
+  5 client_preprocess_input : 0.001s
+  6 client_encode_encrypt   : 1.85s for 1 sample(s) = 1855 ms each (+1.4s context setup)
+  7 server_encrypted_compute: 0.155s TPU execute for 1 inference(s) on 8 chip(s) = 155 ms each, 6.44/s
+  8 client_decrypt_decode   : 0.64s for 1 sample(s) = 640 ms each
+  9 client_postprocess      : 0.000s
+
+Harness measurements — single (CROSS/TPU)
+=========================================
+  results-1.json: {"total_latency_ms": 493.2293, "per_stage": {"Harness: MNIST Test dataset generation": "4.1665s", "Client: Key Generation": "4.7195s", "Server: (Encrypted) model preprocessing": "475.5046s", "Harness: Input generation for MNIST": "1.8715s", "Client: Input preprocessing": "0.084s", "Client: Input encryption": "3.813s", "Server: Encrypted ML Inference computation": "0.3079s", "Client: Result decrypt
+  results-2.json: {"total_latency_ms": 493.2396, "per_stage": {"Harness: MNIST Test dataset generation": "4.1665s", "Client: Key Generation": "4.7195s", "Server: (Encrypted) model preprocessing": "475.5046s", "Harness: Input generation for MNIST": "1.9481s", "Client: Input preprocessing": "0.0815s", "Client: Input encryption": "3.8191s", "Server: Encrypted ML Inference computation": "0.2566s", "Client: Result decry
+  results-3.json: {"total_latency_ms": 493.4341, "per_stage": {"Harness: MNIST Test dataset generation": "4.1665s", "Client: Key Generation": "4.7195s", "Server: (Encrypted) model preprocessing": "475.5046s", "Harness: Input generation for MNIST": "1.9574s", "Client: Input preprocessing": "0.0821s", "Client: Input encryption": "4.0155s", "Server: Encrypted ML Inference computation": "0.2592s", "Client: Result decry

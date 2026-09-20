@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Benchmark stage 3 -- server: materialize the encrypted model on the TPU.
+
+This is where every offline cost of the CROSS deployment is paid and measured:
+BSGS plan selection and diagonal encoding for each MatVec, evaluation- and
+rotation-key materialization, plaintext constant encoding, device placement
+across the TPU chips, and the fused XLA compilation.  The result stays resident
+in a daemon, because a compiled JAX executable cannot cross a process boundary
+and rebuilding it per request would charge compilation time to inference.
+
+Blocks until the daemon reports ready, so the harness's stage-3 measurement is
+the whole preprocessing cost and not just a fork.
+"""
+import os, signal, subprocess, sys, time
+from pathlib import Path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
+import cross_task as ct
+
+SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src')
+STARTUP_TIMEOUT = float(os.environ.get('CROSS_STARTUP_TIMEOUT', '5400'))
+
+def stop_existing(paths):
+    """Stop every resident CROSS server, not just this instance size's.
+
+    A TPU admits exactly one process. A daemon left over from a *different*
+    instance size still owns the chips, and the new one would fail to
+    initialize the backend, so sweep the whole run directory.
+    """
+    run_root = paths.rundir.parent
+    for pidfile in sorted(run_root.glob('*/cross_server.pid')):
+        try:
+            pid = int(pidfile.read_text().strip())
+        except (ValueError, OSError):
+            pidfile.unlink(missing_ok=True)
+            continue
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except (ProcessLookupError, PermissionError):
+            pidfile.unlink(missing_ok=True)
+            continue
+        print(f"         [server] stopping resident CROSS server pid {pid}")
+        for _ in range(150):
+            time.sleep(0.2)
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                break
+        else:
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        pidfile.unlink(missing_ok=True)
+    # The driver releases the accelerator a moment after the process dies.
+    time.sleep(3)
+
+def clear_stale_tpu_lock():
+    """Remove a libtpu lockfile orphaned by a killed process.
+
+    libtpu leaves /tmp/libtpu_lockfile behind when its owner dies abnormally,
+    and the next process then fails with "Internal error when accessing
+    libtpu multi-process lockfile" even though no one holds the chips. Only
+    safe once stop_existing has confirmed no CROSS server is alive.
+    """
+    lockfile = Path('/tmp/libtpu_lockfile')
+    try:
+        if lockfile.exists():
+            lockfile.unlink()
+            print('         [server] cleared stale libtpu lockfile')
+    except OSError:
+        pass  # owned by another user, or already gone
+
+
+def main():
+    size = ct.parse_size(sys.argv) if len(sys.argv) > 1 else 0
+    paths = ct.Paths(size)
+    paths.iodir.mkdir(parents=True, exist_ok=True)
+    paths.ensure_rundir()
+    stop_existing(paths)
+    clear_stale_tpu_lock()
+    for marker in (paths.ready_marker, paths.failed_marker):
+        if marker.exists():
+            marker.unlink()
+
+    devices = os.environ.get('CROSS_DEVICE_COUNT', str(ct.DEFAULT_DEVICE_COUNT))
+    log = open(paths.daemon_log, 'w')
+    started = time.perf_counter()
+    daemon = subprocess.Popen(
+        [sys.executable, os.path.join(SRC, 'server_daemon.py'), str(size),
+         '--devices', devices],
+        stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+
+    ready, failed = paths.ready_marker, paths.failed_marker
+    while True:
+        if ready.exists():
+            break
+        if failed.exists():
+            print(failed.read_text(), file=sys.stderr)
+            sys.exit('[server] CROSS Mapping materialization failed')
+        # Watch the process itself, not only the markers. A daemon killed by
+        # the OOM killer or aborting inside XLA never writes either marker,
+        # and waiting out the full startup timeout for that would burn 90
+        # minutes to report a failure that already happened.
+        exit_code = daemon.poll()
+        if exit_code is not None:
+            tail = ''
+            try:
+                tail = ''.join(paths.daemon_log.read_text(
+                    errors='replace').splitlines(keepends=True)[-25:])
+            except OSError:
+                pass
+            print(tail, file=sys.stderr)
+            sys.exit(f'[server] CROSS server exited with code {exit_code} '
+                     f'before becoming ready (see {paths.daemon_log})')
+        if time.perf_counter() - started > STARTUP_TIMEOUT:
+            daemon.terminate()
+            sys.exit(f'[server] timed out after {STARTUP_TIMEOUT:.0f}s '
+                     f'materializing the CROSS Mapping (see {paths.daemon_log})')
+        time.sleep(0.5)
+
+    manifest = ct.read_manifest(paths.manifest_file)
+    setup = manifest['setup_timings']
+    memory = manifest['live_memory']
+    print(f"         [server] CROSS Mapping resident on {manifest['device_count']} "
+          f"TPU chip(s), global_batch={manifest['global_batch']}")
+    print(f"         [server] ring degree={manifest['degree']} slots={manifest['num_slots']} "
+          f"depth={manifest['depth']} security={manifest['security_bits']}-bit")
+    print(f"         [server] setup: pack {setup['pack_s']:.2f}s, keys {setup['key_load_s']:.2f}s, "
+          f"mapping {setup['mapping_build_s']:.2f}s, warmup {setup['warmup_s']:.2f}s")
+    print(f"         [server] rotation keys: {manifest['rotation_key_count']}, "
+          f"live memory estimate: {memory['total_bytes'] / 2**30:.2f} GiB")
+    ct.append_timing(paths, 'server_preprocess_model', {
+        'startup_wall_s': time.perf_counter() - started, **setup})
+
+if __name__ == '__main__':
+    main()

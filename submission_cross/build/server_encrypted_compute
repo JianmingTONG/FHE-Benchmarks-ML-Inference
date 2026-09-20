@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Benchmark stage 7 -- server: run the encrypted inference on the TPU.
+
+Hands the resident daemon the uploaded ciphertexts.  Everything expensive was
+already paid in stage 3, so what this stage measures is ``Mapping.execute``
+plus ciphertext file I/O -- the encrypted MNIST inference itself.
+"""
+import json, os, socket, sys, time
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
+import cross_task as ct
+
+TIMEOUT = float(os.environ.get('CROSS_REQUEST_TIMEOUT', '7200'))
+CONNECT_ATTEMPTS = 10
+
+
+def connect(paths):
+    """Connect to the resident server, retrying a listener that is not up yet.
+
+    stage 3 returns once the ready marker exists; the listening socket appears
+    a moment later. Retrying briefly removes that race instead of failing the
+    run on a lost coin flip.
+    """
+    last = None
+    for attempt in range(CONNECT_ATTEMPTS):
+        try:
+            connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            connection.settimeout(TIMEOUT)
+            connection.connect(str(paths.socket_path))
+            return connection
+        except (FileNotFoundError, ConnectionRefusedError, OSError) as error:
+            last = error
+            connection.close()
+            time.sleep(0.5 * (attempt + 1))
+    sys.exit(f'[server] cannot reach the CROSS server at '
+             f'{paths.socket_path}: {last}. Is it still running? '
+             f'(see {paths.daemon_log})')
+
+
+def request(paths, payload):
+    connection = connect(paths)
+    try:
+        connection.sendall((json.dumps(payload) + '\n').encode())
+        chunks = []
+        while True:
+            chunk = connection.recv(65536)
+            if not chunk:
+                if not chunks:
+                    sys.exit('[server] CROSS server closed the connection '
+                             'without replying; it most likely died mid-request '
+                             f'(see {paths.daemon_log})')
+                break
+            chunks.append(chunk)
+            if chunk.endswith(b'\n'):
+                break
+    except socket.timeout:
+        sys.exit(f'[server] no reply within {TIMEOUT:.0f}s '
+                 f'(raise CROSS_REQUEST_TIMEOUT)')
+    finally:
+        connection.close()
+    try:
+        return json.loads(b''.join(chunks).decode())
+    except json.JSONDecodeError as error:
+        sys.exit(f'[server] malformed reply from the CROSS server: {error}')
+
+def main():
+    size = ct.parse_size(sys.argv)
+    paths = ct.Paths(size)
+    if not paths.socket_path.exists():
+        sys.exit('[server] no resident CROSS server at '
+                 f'{paths.socket_path}; run server_preprocess_model '
+                 '(benchmark stage 3) first')
+
+    started = time.perf_counter()
+    response = request(paths, {
+        'cmd': 'infer',
+        'indir': str(paths.ctxtupdir),
+        'outdir': str(paths.ctxtdowndir),
+        'count': paths.batch_size,
+    })
+    if not response.get('ok'):
+        sys.exit(f"[server] encrypted compute failed: {response.get('error')}")
+    result = response['result']
+    elapsed = time.perf_counter() - started
+
+    print(f"         [server] Run encrypted MNIST inference on "
+          f"{result['device_count']} TPU chip(s)")
+    for index, chunk in enumerate(result['chunk_execute_s']):
+        lanes = min(result['global_batch'],
+                    result['count'] - index * result['global_batch'])
+        print(f"         [server] chunk {index} ({lanes} ciphertext(s)): "
+              f"{chunk * 1000:.1f} ms")
+    print(f"         [server] encrypted compute: {result['execute_total_s']:.3f}s for "
+          f"{result['count']} inference(s) -> {result['per_inference_s'] * 1000:.1f} ms each, "
+          f"{result['throughput_infer_per_s']:.2f} inferences/s")
+    ct.append_timing(paths, 'server_encrypted_compute',
+                     {**result, 'stage_wall_s': elapsed})
+
+if __name__ == '__main__':
+    main()

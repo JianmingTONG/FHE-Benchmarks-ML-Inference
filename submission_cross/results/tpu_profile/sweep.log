@@ -1,0 +1,92 @@
+[profile] building the packed program
+[profile] ring degree=32768 slots=16384 num_q=12 num_p=4 dnum=3 depth=5 security=128-bit
+[profile] generating keys for this ring
+
+[profile] === 1 chip(s), local batch 1, global batch 1 ===
+[bsgs] n1=128, n2=128; 911 diagonals over 8 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 191 diagonals over 2 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 73 diagonals over 2 giant steps; 72 baby rotations.
+/home/jianming_gatech/conda/envs/jaxite/lib/python3.13/site-packages/jax/_src/interpreters/mlir.py:1333: UserWarning: A large amount of constants were captured during lowering (5.44GB total). If this is intentional, disable this warning by setting JAX_CAPTURED_CONSTANTS_WARN_BYTES=-1. To obtain a report of where these constants were encountered, set JAX_CAPTURED_CONSTANTS_REPORT_FRAMES=-1.
+  warnings.warn(message)
+[profile] build 439.2s | execute 147.7 ms median | 147.7 ms/inference | 6.77 inferences/s | max logit error 2.45e-12 | labels 1/1
+
+[profile] === 2 chip(s), local batch 1, global batch 2 ===
+[bsgs] n1=128, n2=128; 911 diagonals over 8 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 191 diagonals over 2 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 73 diagonals over 2 giant steps; 72 baby rotations.
+[profile] build 463.5s | execute 151.2 ms median | 75.6 ms/inference | 13.23 inferences/s | max logit error 3.74e-12 | labels 2/2
+
+[profile] === 4 chip(s), local batch 1, global batch 4 ===
+[bsgs] n1=128, n2=128; 911 diagonals over 8 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 191 diagonals over 2 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 73 diagonals over 2 giant steps; 72 baby rotations.
+[profile] build 465.0s | execute 152.0 ms median | 38.0 ms/inference | 26.31 inferences/s | max logit error 4.09e-12 | labels 4/4
+
+[profile] === 8 chip(s), local batch 1, global batch 8 ===
+[bsgs] n1=128, n2=128; 911 diagonals over 8 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 191 diagonals over 2 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 73 diagonals over 2 giant steps; 72 baby rotations.
+[profile] build 467.2s | execute 153.9 ms median | 19.2 ms/inference | 51.97 inferences/s | max logit error 5.24e-12 | labels 8/8
+
+[profile] summary
+chips  lbatch  gbatch  execute ms  ms/infer   infer/s  speedup
+--------------------------------------------------------------
+    1       1       1       147.7    147.71      6.77    1.00x
+    2       1       2       151.2     75.59     13.23    1.95x
+    4       1       4       152.0     38.01     26.31    3.89x
+    8       1       8       153.9     19.24     51.97    7.68x
+
+[profile] wrote /home/jianming_gatech/FHE-Benchmarks-ML-Inference/submission_cross/results/tpu_profile/profile_results.json
+[profile] building the packed program
+[profile] ring degree=32768 slots=16384 num_q=12 num_p=4 dnum=3 depth=5 security=128-bit
+[profile] generating keys for this ring
+
+[profile] === 8 chip(s), local batch 2, global batch 16 ===
+[bsgs] n1=128, n2=128; 911 diagonals over 8 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 191 diagonals over 2 giant steps; 127 baby rotations.
+[bsgs] n1=128, n2=128; 73 diagonals over 2 giant steps; 72 baby rotations.
+/home/jianming_gatech/conda/envs/jaxite/lib/python3.13/site-packages/jax/_src/interpreters/mlir.py:1333: UserWarning: A large amount of constants were captured during lowering (5.44GB total). If this is intentional, disable this warning by setting JAX_CAPTURED_CONSTANTS_WARN_BYTES=-1. To obtain a report of where these constants were encountered, set JAX_CAPTURED_CONSTANTS_REPORT_FRAMES=-1.
+  warnings.warn(message)
+F0919 23:38:01.195760 2140506 fusion_emitter.cc:2988] Check failed: window.strides[physical_scaled_dim_index] == current_scaled_dim_window_bound (1 vs. 4) Scaled dimension stride is not equal to window bound.
+*** Check failure stack trace: ***
+    @     0x7ce714d94a94  absl::log_internal::LogMessage::SendToLog()
+    @     0x7ce714d94a58  absl::log_internal::LogMessage::Flush()
+    @     0x7ce70793e146  xla::jellyfish::BitcastInput::TransformStaticWindow()
+    @     0x7ce707936d79  xla::jellyfish::BitcastInput::TransformWindow()
+    @     0x7ce707965889  xla::jellyfish::BitcastInput::BitcastInput()
+    @     0x7ce70791f5b4  xla::jellyfish::FusionEmitter::GetFusionInput()
+    @     0x7ce707925213  xla::jellyfish::FusionEmitter::AddFusionInputs()::$_1::operator()()
+    @     0x7ce70791dbde  xla::jellyfish::FusionEmitter::AddFusionInputs()
+    @     0x7ce707920fd3  xla::jellyfish::FusionEmitter::AddInputInternal()
+    @     0x7ce70792187f  xla::jellyfish::FusionEmitter::AddInput()
+    @     0x7ce707922567  xla::jellyfish::FusionEmitter::AddNestedFusionEmitter()
+    @     0x7ce7079233ab  xla::jellyfish::FusionEmitter::SetupNestedLoopFusionEmitters()
+    @     0x7ce707920960  xla::jellyfish::FusionEmitter::AddInputInternal()
+    @     0x7ce70792187f  xla::jellyfish::FusionEmitter::AddInput()
+    @     0x7ce707922567  xla::jellyfish::FusionEmitter::AddNestedFusionEmitter()
+    @     0x7ce7079233ab  xla::jellyfish::FusionEmitter::SetupNestedLoopFusionEmitters()
+    @     0x7ce707920960  xla::jellyfish::FusionEmitter::AddInputInternal()
+    @     0x7ce7079207e8  xla::jellyfish::FusionEmitter::AddInput()
+    @     0x7ce70791996f  xla::jellyfish::FusionEmitter::Emit()
+    @     0x7ce70674a520  std::__u::__function::__policy_func<>::__call_func<>()
+    @     0x7ce706758350  std::__u::__function::__policy_func<>::__call_func<>()
+    @     0x7ce70674eb1a  xla::jellyfish::LoweringEmitter::AddWorkUnit()::$_1::operator()()
+    @     0x7ce7067354d6  std::__u::__function::__policy_func<>::__call_func<>()
+    @     0x7ce70d289030  absl::internal_any_invocable::RemoteInvoker<>()
+    @     0x7ce71498614e  thread::Fiber::Body()
+    @     0x7ce714989fb2  thread::(anonymous namespace)::FutexDomainThread::WorkLoop()
+    @     0x7ce714992ea2  thread::CommonFiberDomainThread::Run()
+    @     0x7ce714bbb9b6  Thread::ThreadBody()
+    @     0x7ce858494ac3  (unknown)
+https://symbolize.stripped_domain/r/?trace=7ce714d94a93,7ce714d94a57,7ce70793e145,7ce707936d78,7ce707965888,7ce70791f5b3,7ce707925212,7ce70791dbdd,7ce707920fd2,7ce70792187e,7ce707922566,7ce7079233aa,7ce70792095f,7ce70792187e,7ce707922566,7ce7079233aa,7ce70792095f,7ce7079207e7,7ce70791996e,7ce70674a51f,7ce70675834f,7ce70674eb19,7ce7067354d5,7ce70d28902f,7ce71498614d,7ce714989fb1,7ce714992ea1,7ce714bbb9b5,7ce858494ac2&map= 
+https://symbolize.stripped_domain/r/?trace=7ce8584969fc,7ce85844251f&map= 
+*** SIGABRT received by PID 2135678 (TID 2140506) on cpu 12, si_code=-6, from PID 2135678; ***
+E0919 23:38:01.316262 2140506 coredump_hook.cc:309] RAW: Remote crash data gathering hook invoked.
+E0919 23:38:01.316286 2140506 coredump_hook.cc:348] RAW: Skipping coredump since rlimit was 0 at process start.
+E0919 23:38:01.316295 2140506 client.cc:261] RAW: Coroner client retries enabled, will retry for up to 30 sec.
+E0919 23:38:01.316299 2140506 coredump_hook.cc:404] RAW: Sending fingerprint to remote end.
+E0919 23:38:01.316323 2140506 coredump_hook.cc:414] RAW: Cannot send fingerprint to Coroner: [NOT_FOUND] stat failed on crash reporting socket /var/google/services/logmanagerd/remote_coredump.socket (Is the listener running?): No such file or directory
+E0919 23:38:01.316328 2140506 coredump_hook.cc:466] RAW: Dumping core locally.
+F0919 23:38:01.195760 2140506 fusion_emitter.cc:2988] Check failed: window.strides[physical_scaled_dim_index] == current_scaled_dim_window_bound (1 vs. 4) Scaled dimension stride is not equal to window bound.
+E0919 23:38:03.679314 2140506 process_state.cc:794] RAW: Raising signal 6 with default behavior
+./submission_cross/scripts/run_tpu_profile.sh: line 28: 2135678 Aborted                 (core dumped) python3 -u submission_cross/profile/profile_tpu.py --devices 8 --local-batch 2,4 --iterations 20 --warmup 3 --trace-config none --out "$OUT/batched"

@@ -1,0 +1,33 @@
+/home/jianming_gatech/conda/envs/jaxite/lib/python3.13/site-packages/jax/_src/interpreters/mlir.py:1333: UserWarning: A large amount of constants were captured during lowering (5.44GB total). If this is intentional, disable this warning by setting JAX_CAPTURED_CONSTANTS_WARN_BYTES=-1. To obtain a report of where these constants were encountered, set JAX_CAPTURED_CONSTANTS_REPORT_FRAMES=-1.
+  warnings.warn(message)
+F0919 23:48:46.002269 2146328 fusion_emitter.cc:2988] Check failed: window.strides[physical_scaled_dim_index] == current_scaled_dim_window_bound (1 vs. 4) Scaled dimension stride is not equal to window bound.
+*** Check failure stack trace: ***
+    @     0x7d15ae394a94  absl::log_internal::LogMessage::SendToLog()
+    @     0x7d15ae394a58  absl::log_internal::LogMessage::Flush()
+    @     0x7d15a0f3e146  xla::jellyfish::BitcastInput::TransformStaticWindow()
+    @     0x7d15a0f36d79  xla::jellyfish::BitcastInput::TransformWindow()
+    @     0x7d15a0f65889  xla::jellyfish::BitcastInput::BitcastInput()
+    @     0x7d15a0f1f5b4  xla::jellyfish::FusionEmitter::GetFusionInput()
+    @     0x7d15a0f25213  xla::jellyfish::FusionEmitter::AddFusionInputs()::$_1::operator()()
+    @     0x7d15a0f1dbde  xla::jellyfish::FusionEmitter::AddFusionInputs()
+    @     0x7d15a0f20fd3  xla::jellyfish::FusionEmitter::AddInputInternal()
+    @     0x7d15a0f2187f  xla::jellyfish::FusionEmitter::AddInput()
+    @     0x7d15a0f22567  xla::jellyfish::FusionEmitter::AddNestedFusionEmitter()
+    @     0x7d15a0f233ab  xla::jellyfish::FusionEmitter::SetupNestedLoopFusionEmitters()
+    @     0x7d15a0f20960  xla::jellyfish::FusionEmitter::AddInputInternal()
+    @     0x7d15a0f2187f  xla::jellyfish::FusionEmitter::AddInput()
+    @     0x7d15a0f22567  xla::jellyfish::FusionEmitter::AddNestedFusionEmitter()
+    @     0x7d15a0f233ab  xla::jellyfish::FusionEmitter::SetupNestedLoopFusionEmitters()
+    @     0x7d15a0f20960  xla::jellyfish::FusionEmitter::AddInputInternal()
+    @     0x7d15a0f207e8  xla::jellyfish::FusionEmitter::AddInput()
+    @     0x7d15a0f1996f  xla::jellyfish::FusionEmitter::Emit()
+    @     0x7d159fd4a520  std::__u::__function::__policy_func<>::__call_func<>()
+    @     0x7d159fd58350  std::__u::__function::__policy_func<>::__call_func<>()
+    @     0x7d159fd4eb1a  xla::jellyfish::LoweringEmitter::AddWorkUnit()::$_1::operator()()
+    @     0x7d159fd354d6  std::__u::__function::__policy_func<>::__call_func<>()
+    @     0x7d15a6889030  absl::internal_any_invocable::RemoteInvoker<>()
+--
+E0919 23:48:46.120135 2146328 coredump_hook.cc:414] RAW: Cannot send fingerprint to Coroner: [NOT_FOUND] stat failed on crash reporting socket /var/google/services/logmanagerd/remote_coredump.socket (Is the listener running?): No such file or directory
+E0919 23:48:46.120138 2146328 coredump_hook.cc:466] RAW: Dumping core locally.
+F0919 23:48:46.002269 2146328 fusion_emitter.cc:2988] Check failed: window.strides[physical_scaled_dim_index] == current_scaled_dim_window_bound (1 vs. 4) Scaled dimension stride is not equal to window bound.
+E0919 23:48:48.509672 2146328 process_state.cc:794] RAW: Raising signal 6 with default behavior

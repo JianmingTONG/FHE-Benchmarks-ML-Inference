@@ -7,6 +7,9 @@ bmenv
 
 # Build artefacts
 */build/
+# ...except the CROSS submission's, which is a Python submission: its build/
+# holds checked-in stage executables, not compiler output.
+!submission_cross/build/
 io/
 third_party/
 measurements/

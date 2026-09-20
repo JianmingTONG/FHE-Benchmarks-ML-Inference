@@ -3,6 +3,7 @@
 utils.py - Scaffolding code for running the submission.
 """
 
+import os
 import sys
 import subprocess
 import argparse
@@ -47,20 +48,40 @@ def parse_submission_arguments(workload: str) -> Tuple[int, InstanceParams, int,
     params = InstanceParams(size)
     return size, params, seed, num_runs, clrtxt
 
+def submission_dirname() -> str:
+    """Which submission subdirectory to drive.
+
+    Defaults to 'submission' (the reference OpenFHE implementation), so an
+    unset environment reproduces the harness's original behaviour exactly.
+    Set FHE_SUBMISSION_DIR to run a different submission in the same tree --
+    used here to keep the OpenFHE CPU baseline runnable alongside the CROSS
+    TPU submission for an apples-to-apples comparison.
+    """
+    return os.environ.get('FHE_SUBMISSION_DIR', 'submission')
+
+
 def ensure_directories(rootdir: Path):
     """ Check that the current directory has sub-directories
-    'harness', 'scripts', and 'submission' """
-    required_dirs = ['harness', 'scripts', 'submission']
+    'harness', 'scripts', and the selected submission """
+    required_dirs = ['harness', 'scripts', submission_dirname()]
     for dir_name in required_dirs:
         if not (rootdir / dir_name).exists():
             print(f"Error: Required directory '{dir_name}'",
                   f"not found in {rootdir}")
             sys.exit(1)
 
-def build_submission(script_dir: Path):
+def build_submission(script_dir: Path, submission_dir: Path = None):
     """
     Build the submission, including pulling dependencies as neeed
+
+    A submission that ships its own scripts/build_task.sh owns its whole build
+    (dependencies included); the OpenFHE path below is the reference one.
     """
+    if submission_dir is not None:
+        own_build = submission_dir/"scripts"/"build_task.sh"
+        if own_build.exists():
+            subprocess.run([str(own_build), str(submission_dir)], check=True)
+            return
     # Clone and build OpenFHE if needed
     subprocess.run([script_dir/"get_openfhe.sh"], check=True)
     # CMake build of the submission itself
