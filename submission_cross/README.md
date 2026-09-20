@@ -124,6 +124,9 @@ rotation-key bytes, and stage 3 prints them.
 
 ## Running
 
+Step-by-step instructions, expected output, timings and troubleshooting are in
+**[EVALUATION.md](EVALUATION.md)**. The short form:
+
 ```console
 # CROSS on TPU
 FHE_SUBMISSION_DIR=submission_cross python3 harness/run_submission.py 0 --seed 3
@@ -208,6 +211,7 @@ submission_cross/
 ├─ model/         he_mlp.py, train_he_mlp.py, export_weights.py, weights
 ├─ src/           cross_task.py (shared), server_daemon.py (resident TPU server)
 ├─ build/         the stage executables the harness invokes
+├─ EVALUATION.md  how to reproduce every number in RESULTS.md
 ├─ scripts/       build_task.sh, run_cross_benchmark.sh, run_tpu_profile.sh, selftest.sh
 ├─ profile/       profile_tpu.py, trace_breakdown.py, report.py
 └─ results/       measurements behind RESULTS.md

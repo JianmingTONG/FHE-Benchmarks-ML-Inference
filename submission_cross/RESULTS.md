@@ -4,6 +4,9 @@
 33.5 GB reported limit), 180 vCPU host, 1.4 TiB RAM. JAX 0.11.2, CROSS
 (`jaxite_word`) 3.0.0, OpenFHE 1.3.1, torch 2.14 CPU.
 
+**Reproducing these numbers.** See [EVALUATION.md](EVALUATION.md); each
+section below names the command that produced it.
+
 **Workload.** The benchmark's MNIST inference, `784 → 128 → 64 → 10`, with the
 harness's ReLU replaced by x² (the only substitution CROSS's activation
 registry accepts). See `README.md` for the architecture change and the
